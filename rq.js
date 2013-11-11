@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2013-06-22
+    2013-10-11
     Public Domain
 
 This package uses four kinds of functions:
@@ -389,7 +389,7 @@ var RQ = (function () {
                                 },
                                 initial
                             );
-                            if (quashes[index] === undefined) {
+                            if (quashes && quashes[index] === undefined) {
                                 quashes[index] = cancel;
                             }
                         });

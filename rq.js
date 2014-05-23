@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2013-10-11
+    2014-05-22
     Public Domain
 
 This package uses four kinds of functions:
@@ -217,7 +217,7 @@ var RQ = (function () {
 // If all of the requestor functions fail, then the fallback fails. If the time
 // expires, then work in progress is cancelled.
 
-            check("RQ.fallack", requestors, milliseconds);
+            check("RQ.fallback", requestors, milliseconds);
             return function requestor(requestion, initial) {
                 var cancel,
                     timeout_id;
@@ -242,7 +242,7 @@ var RQ = (function () {
                     return finish(undefined, reason || true);
                 }
 
-                check_requestion("RQ.fallack", requestion, initial);
+                check_requestion("RQ.fallback", requestion, initial);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         return quash(expired("RQ.fallback", milliseconds));
@@ -262,11 +262,11 @@ var RQ = (function () {
 // If there is another requestor, call it in the next turn, passing the value
 // and a requestion that will take the next step.
 
-                        var requestor = requestors[index];
+                        var rqstr = requestors[index];
                         setImmediate(function () {
                             var once = true;
                             if (typeof requestion === 'function') {
-                                cancel = requestor(
+                                cancel = rqstr(
                                     function requestion(success, failure) {
                                         if (once) {
                                             once = false;
@@ -544,7 +544,7 @@ var RQ = (function () {
                     }, milliseconds);
                 }
                 (function next(index) {
-                    var requestor, r = requestion;
+                    var rqstr, r = requestion;
                     if (typeof r === 'function') {
 
 // If there are no more requestors, then signal success.
@@ -561,10 +561,10 @@ var RQ = (function () {
 // If there is another requestor, call it in the next turn, passing the value
 // and a requestion that will take the next step.
 
-                        requestor = requestors[index];
+                        rqstr = requestors[index];
                         setImmediate(function () {
                             var once = true;
-                            cancel = requestor(
+                            cancel = rqstr(
                                 function requestion(success, failure) {
                                     if (once) {
                                         once = false;

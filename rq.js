@@ -209,7 +209,7 @@ var RQ = (function () {
     }
 
     return {
-        fallback : function fallback(requestors, milliseconds) {
+        fallback: function fallback(requestors, milliseconds) {
 
 // RQ.fallback takes an array of requestor functions, and returns a requestor
 // that will call them each in order until it finds a successful outcome.

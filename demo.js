@@ -34,7 +34,7 @@ function WIDGET(name) {
         }, false);
         demo.appendChild(fieldset);
         return function quash() {
-            fieldset.style.backgroundColor = "silver";
+            fieldset.style.backgroundColor = "darkgray";
         };
     };
 }

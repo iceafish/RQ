@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2014-05-22
+    2015-02-25
     Public Domain
 
 This package uses four kinds of functions:
@@ -272,8 +272,8 @@ var RQ = (function () {
                                             once = false;
                                             cancel = null;
                                             return failure === undefined
-                                                ? finish(success)
-                                                : next(index + 1, failure);
+                                            ? finish(success)
+                                            : next(index + 1, failure);
                                         }
                                     },
                                     initial
@@ -299,7 +299,7 @@ var RQ = (function () {
                 optionals = undefined;
             }
             check("RQ.parallel", requestors, milliseconds, optionals,
-                tilliseconds);
+                    tilliseconds);
 
             return function requestor(requestion, initial) {
                 var quashes = [],
@@ -347,11 +347,11 @@ var RQ = (function () {
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         timeout_id = null;
-                        return requestors_remaining === 0 &&
-                                (requestors_length > 0 ||
-                                optionals_successes > 0)
-                            ? finish(results)
-                            : quash(expired("RQ.parallel", milliseconds));
+                        return requestors_remaining === 0 && (
+                            requestors_length > 0 || optionals_successes > 0
+                        )
+                        ? finish(results)
+                        : quash(expired("RQ.parallel", milliseconds));
                     }, milliseconds);
 
 // tilliseconds, if specified, gives more time for the optional requestors to
@@ -371,24 +371,25 @@ var RQ = (function () {
                 if (requestors) {
                     requestors.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true, cancel = requestor(
-                                function requestion(success, failure) {
-                                    if (once && quashes) {
-                                        once = false;
-                                        quashes[index] = null;
-                                        if (failure !== undefined) {
-                                            return quash(failure);
+                            var once = true, 
+                                cancel = requestor(
+                                    function requestion(success, failure) {
+                                        if (once && quashes) {
+                                            once = false;
+                                            quashes[index] = null;
+                                            if (failure !== undefined) {
+                                                return quash(failure);
+                                            }
+                                            results[index] = success;
+                                            requestors_remaining -= 1;
+                                            if (requestors_remaining === 0 &&
+                                                    !timeout_till) {
+                                                return finish(results);
+                                            }
                                         }
-                                        results[index] = success;
-                                        requestors_remaining -= 1;
-                                        if (requestors_remaining === 0 &&
-                                                !timeout_till) {
-                                            return finish(results);
-                                        }
-                                    }
-                                },
-                                initial
-                            );
+                                    },
+                                    initial
+                                );
                             if (quashes && quashes[index] === undefined) {
                                 quashes[index] = cancel;
                             }
@@ -399,34 +400,37 @@ var RQ = (function () {
                     optionals_remaining = optionals.length;
                     optionals.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true, cancel = requestor(
-                                function requestion(success, failure) {
-                                    if (once && quashes) {
-                                        once = false;
-                                        quashes[requestors_length + index]
-                                            = null;
-                                        if (failure === undefined) {
-                                            results[requestors_length + index]
-                                                = success;
-                                            optionals_successes += 1;
-                                        }
-                                        optionals_remaining -= 1;
-                                        if (optionals_remaining === 0) {
-                                            if (requestors_remaining === 0) {
-                                                return requestors_length > 0 ||
-                                                        optionals_successes > 0
+                            var once = true, 
+                                cancel = requestor(
+                                    function requestion(success, failure) {
+                                        if (once && quashes) {
+                                            once = false;
+                                            quashes[
+                                                requestors_length + index
+                                            ] = null;
+                                            if (failure === undefined) {
+                                                results[
+                                                    requestors_length + index
+                                                ] = success;
+                                                optionals_successes += 1;
+                                            }
+                                            optionals_remaining -= 1;
+                                            if (optionals_remaining === 0) {
+                                                if (requestors_remaining === 0) {
+                                                    return requestors_length > 0 ||
+                                                            optionals_successes > 0
                                                     ? finish(results)
                                                     : quash(failure);
-                                            }
-                                            if (timeout_till) {
-                                                clearTimeout(timeout_till);
-                                                timeout_till = null;
+                                                }
+                                                if (timeout_till) {
+                                                    clearTimeout(timeout_till);
+                                                    timeout_till = null;
+                                                }
                                             }
                                         }
-                                    }
-                                },
-                                initial
-                            );
+                                    },
+                                    initial
+                                );
                             if (quashes[requestors_length + index] ===
                                     undefined) {
                                 quashes[requestors_length + index] = cancel;
@@ -479,22 +483,23 @@ var RQ = (function () {
                 }
                 requestors.forEach(function (requestor, index) {
                     return setImmediate(function () {
-                        var once = true, cancel = requestor(
-                            function requestion(success, failure) {
-                                if (once && quashes) {
-                                    once = false;
-                                    quashes[index] = null;
-                                    if (failure === undefined) {
-                                        return finish(success);
+                        var once = true, 
+                            cancel = requestor(
+                                function requestion(success, failure) {
+                                    if (once && quashes) {
+                                        once = false;
+                                        quashes[index] = null;
+                                        if (failure === undefined) {
+                                            return finish(success);
+                                        }
+                                        remaining -= 1;
+                                        if (remaining === 0) {
+                                            return quash(failure);
+                                        }
                                     }
-                                    remaining -= 1;
-                                    if (remaining === 0) {
-                                        return quash(failure);
-                                    }
-                                }
-                            },
-                            initial
-                        );
+                                },
+                                initial
+                            );
                         if (quashes[index] === undefined) {
                             quashes[index] = cancel;
                         }

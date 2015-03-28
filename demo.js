@@ -1,17 +1,23 @@
 // demo.js
 
 // This is used by demo.html to demonstrate rq.js. It include a widget function
-// that represents a service requestory, a SHOW function that is a requestion
+// that represents a service requestory, a show function that is a callback
 // that displays the final result, and an RQ program written as an annotated
 // nested array.
 
 /*global document, RQ */
 
+/*property
+    addEventListener, appendChild, backgroundColor, createElement,
+    createTextNode, fallback, getElementById, parallel, race, sequence,
+    stringify, style, type, value
+*/
+
 function widget(name) {
     'use strict';
-    return function requestor(requestion, value) {
-        var result = value 
-            ? value + '>' + name 
+    return function requestor(callback, value) {
+        var result = value
+            ? value + '>' + name
             : name,
             demo = document.getElementById("demo"),
             fieldset = document.createElement("fieldset"),
@@ -26,22 +32,22 @@ function widget(name) {
         success.value = "success";
         success.addEventListener("click", function () {
             fieldset.style.backgroundColor = "lightgreen";
-            return requestion(result);
+            return callback(result);
         }, false);
         failure.type = "button";
         failure.value = "failure";
         failure.addEventListener("click", function () {
             fieldset.style.backgroundColor = "pink";
-            return requestion(undefined, result);
+            return callback(undefined, result);
         }, false);
         demo.appendChild(fieldset);
-        return function quash() {
+        return function cancel() {
             fieldset.style.backgroundColor = "darkgray";
         };
     };
 }
 
-function SHOW(success, failure) {
+function show(success, failure) {
     'use strict';
     var result,
         title,
@@ -110,4 +116,4 @@ RQ.parallel([
         widget('Opt Fall S2'),
         widget('Opt Fall S3')
     ])
-])(SHOW);
+])(show);

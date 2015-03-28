@@ -2,84 +2,82 @@
     rq.js
 
     Douglas Crockford
-    2015-02-25
+    2015-03-25
     Public Domain
 
 This package uses four kinds of functions:
     requestor
-    requestion
-    quash
-    requestory
+    callback
+    cancel
+    factory
 
 
-requestor(requestion [, initial])
-    may return a quash function
+requestor(callback [, initial])
+    may return a cancel function
 
     A requestor is a function that makes a request. Such a request need not
-    be satisified immediately. It is likely that the request will not be
-    satisified until some future turn. Requestors provide a means of dealing
+    be satisfied immediately. It is likely that the request will not be
+    satisfied until some future turn. Requestors provide a means of dealing
     with future activities without blocking.
 
-    A requestor is a function that takes a requestion function as its first
+    A requestor is a function that takes a callback function as its first
     parameter, and optionally an initial value as its second parameter. The
-    requestor uses the requestion to report its result. A requestor may
-    optionally return a quash function that might be used to cancel the
-    request, triggering the requestion function with a failure result.
+    requestor uses the callback to report its result. A requestor may
+    optionally return a cancel function that might be used to cancel the
+    request, triggering the callback function with a failure result.
 
     The initial parameter contains a value that may be used to initialize the
     request. It is provided specifically for RQ.sequence, but it may be passed
     to any requestor.
 
 
-requestion(success, failure)
+callback(success, failure)
     returns undefined
 
-    A requestion function is a continuation or callback. It is used to deliver
-    the result of a request. A requestion takes two arguments: success and
-    failure. If the request succeeds, then the result will be passed to the
-    requestion function as the success parameter, and the failure parameter
-    will be undefined. If the request fails, then the requestion function will
-    be passed the reason as the failure parameter. If failure is undefined,
-    then the request succeeded. If failure is any other value, then the request
-    failed.
+    A callback function is used to deliver the result of a request. A callback
+    takes two arguments: success and failure. If the request succeeds, then the
+    result will be passed to the callback function as the success parameter,
+    and the failure parameter will be undefined. If the request fails, then the
+    reason will be passed to the callback function as the failure parameter. If
+    failure is undefined, then the request succeeded. If failure is any other
+    value, then the request failed.
 
 
-quash(reason)
+cancel(reason)
     returns undefined
 
     If a request is likely to be expensive to satisfy, the requestor may
-    optionally return a quash function that would allow the request to be
-    cancelled. A requestor is not required to return a quash function, and
-    the quash function will not be guaranteed to cancel the request. The
-    quash's reason argument may become the requestion's failure argument.
+    optionally return a cancel function that would allow the request to be
+    cancelled. A requestor is not required to return a cancel function, and
+    the cancel function will not be guaranteed to cancel the request. The
+    cancel's reason argument may become the callback's failure argument.
 
 
-requestory([arguments])
+factory([arguments])
     returns a requestor function
 
-    A requestory is a factory function that produces a requestor function. A
-    requestory function will usually take parameters that will customize or
-    specialize a request. It is possible to write requestor functions by hand,
-    but it is usually easier to generate them with requestories.
+    A factory function produces requestor functions. A factory function will
+    usually take parameters that will customize or specialize a request. It is
+    possible to write requestor functions by hand, but it is usually easier to
+    generate them with factories.
 
 
-The RQ object contains some requestory functions that permit the composition of
-requestors:
+The RQ object contains four factory functions:
 
     RQ.fallback(requestors, milliseconds)
     RQ.race(requestors, milliseconds)
     RQ.parallel(requestors, optionals, milliseconds, tilliseconds)
     RQ.sequence(requestors, milliseconds)
 
-Each of these four requestory functions returns a requestor function that
-returns a quash function.
+Each of these four factory functions returns a requestor function that
+returns a cancel function.
 
 
 RQ.fallback(requestors, milliseconds)
 
     RQ.fallback returns a requestor function that will call the first element
     in the requestors array. If that is ultimately successful, its value will
-    be passed to the requestion. But if it fails, the next element will be
+    be passed to the callback. But if it fails, the next element will be
     called, and so on. If none of the elements are successful, then the
     fallback fails. If any succeeds, then the fallback succeeds.
 
@@ -199,9 +197,9 @@ var RQ = (function () {
         }
     }
 
-    function check_requestion(method, requestion, initial) {
-        if (typeof requestion !== 'function') {
-            throw new TypeError(method + " requestion");
+    function check_callback(method, callback, initial) {
+        if (typeof callback !== 'function') {
+            throw new TypeError(method + " callback");
         }
         if (initial !== null && typeof initial === 'object') {
             Object.freeze(initial);
@@ -218,59 +216,59 @@ var RQ = (function () {
 // expires, then work in progress is cancelled.
 
             check("RQ.fallback", requestors, milliseconds);
-            return function requestor(requestion, initial) {
-                var cancel,
+            return function requestor(callback, initial) {
+                var cancellation,
                     timeout_id;
 
                 function finish(success, failure) {
-                    var r = requestion;
-                    cancel = null;
+                    var r = callback;
+                    cancellation = null;
                     if (r) {
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
-                        requestion = null;
+                        callback = null;
                         timeout_id = null;
                         return r(success, failure);
                     }
                 }
 
-                function quash(reason) {
-                    if (requestion && typeof cancel === 'function') {
-                        setImmediate(cancel, reason);
+                function cancel(reason) {
+                    if (callback && typeof cancellation === 'function') {
+                        setImmediate(cancellation, reason);
                     }
                     return finish(undefined, reason || true);
                 }
 
-                check_requestion("RQ.fallback", requestion, initial);
+                check_callback("RQ.fallback", callback, initial);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
-                        return quash(expired("RQ.fallback", milliseconds));
+                        return cancel(expired("RQ.fallback", milliseconds));
                     }, milliseconds);
                 }
                 (function next(index, failure) {
-                    if (typeof requestion === 'function') {
+                    if (typeof callback === 'function') {
 
 // If there are no more requestors, then signal failure.
 
                         if (index >= requestors.length) {
                             clearTimeout(timeout_id);
-                            cancel = null;
-                            return quash(failure);
+                            cancellation = null;
+                            return cancel(failure);
                         }
 
 // If there is another requestor, call it in the next turn, passing the value
-// and a requestion that will take the next step.
+// and a callback that will take the next step.
 
                         var rqstr = requestors[index];
                         setImmediate(function () {
                             var once = true;
-                            if (typeof requestion === 'function') {
-                                cancel = rqstr(
-                                    function requestion(success, failure) {
+                            if (typeof callback === 'function') {
+                                cancellation = rqstr(
+                                    function callback(success, failure) {
                                         if (once) {
                                             once = false;
-                                            cancel = null;
+                                            cancellation = null;
                                             return failure === undefined
                                             ? finish(success)
                                             : next(index + 1, failure);
@@ -282,7 +280,7 @@ var RQ = (function () {
                         });
                     }
                 }(0));
-                return quash;
+                return cancel;
             };
         },
         parallel: function parallel(requestors, optionals, milliseconds,
@@ -301,8 +299,8 @@ var RQ = (function () {
             check("RQ.parallel", requestors, milliseconds, optionals,
                     tilliseconds);
 
-            return function requestor(requestion, initial) {
-                var quashes = [],
+            return function requestor(callback, initial) {
+                var cancels = [],
                     optionals_remaining,
                     optionals_successes = 0,
                     requestors_length = requestors.length,
@@ -312,9 +310,9 @@ var RQ = (function () {
                     timeout_id;
 
                 function finish(success, failure) {
-                    var r = requestion;
+                    var r = callback;
                     if (r) {
-                        requestion = null;
+                        callback = null;
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                             timeout_id = null;
@@ -323,22 +321,22 @@ var RQ = (function () {
                             clearTimeout(timeout_till);
                             timeout_till = null;
                         }
-                        quashes.forEach(function (quash) {
-                            if (typeof quash === 'function') {
-                                return setImmediate(quash, failure);
+                        cancels.forEach(function (cancel) {
+                            if (typeof cancel === 'function') {
+                                return setImmediate(cancel, failure);
                             }
                         });
-                        quashes = null;
+                        cancels = null;
                         results = null;
                         return r(success, failure);
                     }
                 }
 
-                function quash(reason) {
+                function cancel(reason) {
                     return finish(undefined, reason || true);
                 }
 
-                check_requestion("RQ.parallel", requestion, initial);
+                check_callback("RQ.parallel", callback, initial);
 
 // milliseconds, if specified, says take no longer to process this request. If
 // any of the required requestors are not successful by this time, the parallel
@@ -351,7 +349,7 @@ var RQ = (function () {
                             requestors_length > 0 || optionals_successes > 0
                         )
                         ? finish(results)
-                        : quash(expired("RQ.parallel", milliseconds));
+                        : cancel(expired("RQ.parallel", milliseconds));
                     }, milliseconds);
 
 // tilliseconds, if specified, gives more time for the optional requestors to
@@ -371,14 +369,14 @@ var RQ = (function () {
                 if (requestors) {
                     requestors.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true, 
-                                cancel = requestor(
-                                    function requestion(success, failure) {
-                                        if (once && quashes) {
+                            var once = true,
+                                cancellation = requestor(
+                                    function callback(success, failure) {
+                                        if (once && cancels) {
                                             once = false;
-                                            quashes[index] = null;
+                                            cancels[index] = null;
                                             if (failure !== undefined) {
-                                                return quash(failure);
+                                                return cancel(failure);
                                             }
                                             results[index] = success;
                                             requestors_remaining -= 1;
@@ -390,8 +388,8 @@ var RQ = (function () {
                                     },
                                     initial
                                 );
-                            if (quashes && quashes[index] === undefined) {
-                                quashes[index] = cancel;
+                            if (cancels && cancels[index] === undefined) {
+                                cancels[index] = cancellation;
                             }
                         });
                     });
@@ -400,12 +398,12 @@ var RQ = (function () {
                     optionals_remaining = optionals.length;
                     optionals.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true, 
-                                cancel = requestor(
-                                    function requestion(success, failure) {
-                                        if (once && quashes) {
+                            var once = true,
+                                cancellation = requestor(
+                                    function callback(success, failure) {
+                                        if (once && cancels) {
                                             once = false;
-                                            quashes[
+                                            cancels[
                                                 requestors_length + index
                                             ] = null;
                                             if (failure === undefined) {
@@ -420,7 +418,7 @@ var RQ = (function () {
                                                     return requestors_length > 0 ||
                                                             optionals_successes > 0
                                                     ? finish(results)
-                                                    : quash(failure);
+                                                    : cancel(failure);
                                                 }
                                                 if (timeout_till) {
                                                     clearTimeout(timeout_till);
@@ -431,14 +429,14 @@ var RQ = (function () {
                                     },
                                     initial
                                 );
-                            if (quashes[requestors_length + index] ===
+                            if (cancels[requestors_length + index] ===
                                     undefined) {
-                                quashes[requestors_length + index] = cancel;
+                                cancels[requestors_length + index] = cancellation;
                             }
                         });
                     });
                 }
-                return quash;
+                return cancel;
             };
         },
         race: function race(requestors, milliseconds) {
@@ -449,63 +447,63 @@ var RQ = (function () {
 // expires.
 
             check("RQ.race", requestors, milliseconds);
-            return function requestor(requestion, initial) {
-                var quashes = [],
+            return function requestor(callback, initial) {
+                var cancels = [],
                     remaining = requestors.length,
                     timeout_id;
 
                 function finish(success, failure) {
-                    var r = requestion;
+                    var r = callback;
                     if (r) {
-                        requestion = null;
+                        callback = null;
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
-                        quashes.forEach(function stop(quash) {
-                            if (typeof quash === 'function') {
-                                return setImmediate(quash);
+                        cancels.forEach(function stop(cancel) {
+                            if (typeof cancel === 'function') {
+                                return setImmediate(cancel);
                             }
                         });
-                        quashes = null;
+                        cancels = null;
                         return r(success, failure);
                     }
                 }
 
-                function quash(reason) {
+                function cancel(reason) {
                     return finish(undefined, reason || true);
                 }
 
-                check_requestion("RQ.race", requestion, initial);
+                check_callback("RQ.race", callback, initial);
                 if (milliseconds) {
                     timeout_id = setTimeout(function timeout_id() {
-                        return quash(expired("RQ.race", milliseconds));
+                        return cancel(expired("RQ.race", milliseconds));
                     }, milliseconds);
                 }
                 requestors.forEach(function (requestor, index) {
                     return setImmediate(function () {
-                        var once = true, 
-                            cancel = requestor(
-                                function requestion(success, failure) {
-                                    if (once && quashes) {
+                        var once = true,
+                            cancellation = requestor(
+                                function callback(success, failure) {
+                                    if (once && cancels) {
                                         once = false;
-                                        quashes[index] = null;
+                                        cancels[index] = null;
                                         if (failure === undefined) {
                                             return finish(success);
                                         }
                                         remaining -= 1;
                                         if (remaining === 0) {
-                                            return quash(failure);
+                                            return cancel(failure);
                                         }
                                     }
                                 },
                                 initial
                             );
-                        if (quashes[index] === undefined) {
-                            quashes[index] = cancel;
+                        if (cancels[index] === undefined) {
+                            cancels[index] = cancellation;
                         }
                     });
                 });
-                return quash;
+                return cancel;
             };
         },
         sequence: function sequence(requestors, milliseconds) {
@@ -518,38 +516,38 @@ var RQ = (function () {
 // the remaining requestors are not called.
 
             check("RQ.sequence", requestors, milliseconds);
-            return function requestor(requestion, initial) {
-                var cancel,
+            return function requestor(callback, initial) {
+                var cancellation,
                     timeout_id;
 
                 function finish(success, failure) {
-                    var r = requestion;
-                    cancel = null;
+                    var r = callback;
+                    cancellation = null;
                     if (r) {
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
-                        requestion = null;
+                        callback = null;
                         return r(success, failure);
                     }
                 }
 
-                function quash(reason) {
-                    if (requestion && typeof cancel === 'function') {
-                        setImmediate(cancel, reason);
+                function cancel(reason) {
+                    if (callback && typeof cancellation === 'function') {
+                        setImmediate(cancellation, reason);
                     }
                     return finish(undefined, reason || true);
                 }
 
-                check_requestion("RQ.sequence", requestion, initial);
+                check_callback("RQ.sequence", callback, initial);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         timeout_id = null;
-                        return quash(expired("RQ.sequence", milliseconds));
+                        return cancel(expired("RQ.sequence", milliseconds));
                     }, milliseconds);
                 }
                 (function next(index) {
-                    var rqstr, r = requestion;
+                    var rqstr, r = callback;
                     if (typeof r === 'function') {
 
 // If there are no more requestors, then signal success.
@@ -558,24 +556,24 @@ var RQ = (function () {
                             if (timeout_id) {
                                 clearTimeout(timeout_id);
                             }
-                            requestion = null;
-                            cancel = null;
+                            callback = null;
+                            cancellation = null;
                             return r(initial);
                         }
 
 // If there is another requestor, call it in the next turn, passing the value
-// and a requestion that will take the next step.
+// and a callback that will take the next step.
 
                         rqstr = requestors[index];
                         setImmediate(function () {
                             var once = true;
-                            cancel = rqstr(
-                                function requestion(success, failure) {
+                            cancellation = rqstr(
+                                function callback(success, failure) {
                                     if (once) {
                                         once = false;
-                                        cancel = null;
+                                        cancellation = null;
                                         if (failure !== undefined) {
-                                            return quash(failure);
+                                            return cancel(failure);
                                         }
                                         initial = success;
                                         return next(index + 1);
@@ -586,7 +584,7 @@ var RQ = (function () {
                         });
                     }
                 }(0));
-                return quash;
+                return cancel;
             };
         }
     };

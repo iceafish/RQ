@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-03-25
+    2015-04-08
     Public Domain
 
 This package uses four kinds of functions:
@@ -66,7 +66,7 @@ The RQ object contains four factory functions:
 
     RQ.fallback(requestors, milliseconds)
     RQ.race(requestors, milliseconds)
-    RQ.parallel(requestors, optionals, milliseconds, tilliseconds)
+    RQ.parallel(requestors, optionals, milliseconds, untilliseconds)
     RQ.sequence(requestors, milliseconds)
 
 Each of these four factory functions returns a requestor function that
@@ -99,14 +99,14 @@ RQ.race(requestors [, milliseconds])
 
 
 RQ.parallel(requestors [, milliseconds])
-RQ.parallel(requestors, optionals [, milliseconds, [tilliseconds]])
+RQ.parallel(requestors, optionals [, milliseconds, [untilliseconds]])
 
     RQ.parallel returns a requestor that processes many requestors in parallel,
     producing an array of all of the successful results. It can take two arrays
     of requests: Those that are required to produce results, and those that may
     optionally produce results. Each of the optional requestors has until all
     of the required requestors have finished, or until the optional
-    tilliseconds timer has expired.
+    untilliseconds timer has expired.
 
     The result maps the requestors and optionals into a single array. The
     value produced by the first element of the requestors array provides the
@@ -155,7 +155,7 @@ var RQ = (function () {
         };
     }
 
-    function check(method, requestors, milliseconds, optionals, tilliseconds) {
+    function check(method, requestors, milliseconds, optionals, untilliseconds) {
 
 // Verify that the arguments are typed properly.
 
@@ -187,13 +187,17 @@ var RQ = (function () {
             optionals.forEach(is_function);
         }
         requestors.forEach(is_function);
-        if (milliseconds &&
-                (typeof milliseconds !== 'number' || milliseconds < 0)) {
+        if (
+            milliseconds &&
+            (typeof milliseconds !== 'number' || milliseconds < 0)
+        ) {
             throw new TypeError(method + " milliseconds");
         }
-        if (tilliseconds &&
-                (typeof tilliseconds !== 'number' || tilliseconds < 0)) {
-            throw new TypeError(method + " tilliseconds");
+        if (
+            untilliseconds &&
+            (typeof untilliseconds !== 'number' || untilliseconds < 0)
+        ) {
+            throw new TypeError(method + " untilliseconds");
         }
     }
 
@@ -284,7 +288,7 @@ var RQ = (function () {
             };
         },
         parallel: function parallel(requestors, optionals, milliseconds,
-                tilliseconds) {
+                untilliseconds) {
 
 // RQ.parallel takes an array of requestors, and an optional second array of
 // requestors, and starts them all. It succeeds if all of the requestors in
@@ -293,11 +297,11 @@ var RQ = (function () {
 
             if (typeof optionals === 'number') {
                 milliseconds = optionals;
-                tilliseconds = undefined;
+                untilliseconds = undefined;
                 optionals = undefined;
             }
             check("RQ.parallel", requestors, milliseconds, optionals,
-                    tilliseconds);
+                    untilliseconds);
 
             return function requestor(callback, initial) {
                 var cancels = [],
@@ -352,19 +356,19 @@ var RQ = (function () {
                         : cancel(expired("RQ.parallel", milliseconds));
                     }, milliseconds);
 
-// tilliseconds, if specified, gives more time for the optional requestors to
+// untilliseconds, if specified, gives more time for the optional requestors to
 // complete. Normally, the optional requestors have until all of the required
-// requestors finish. If tilliseconds is larger than milliseconds, milliseconds
-// wins.
+// requestors finish. If untilliseconds is larger than milliseconds,
+// milliseconds wins.
 
                 }
-                if (tilliseconds) {
+                if (untilliseconds) {
                     timeout_till = setTimeout(function () {
                         timeout_till = null;
                         if (requestors_remaining === 0) {
                             return finish(results);
                         }
-                    }, tilliseconds);
+                    }, untilliseconds);
                 }
                 if (requestors) {
                     requestors.forEach(function (requestor, index) {

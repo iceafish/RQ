@@ -99,7 +99,7 @@ RQ.race(requestors [, milliseconds])
 
 
 RQ.parallel(requireds [, milliseconds])
-RQ.parallel(requireds, optionals [, milliseconds, [untilliseconds]])
+RQ.parallel(requireds [, milliseconds], optionals [,untilliseconds])
 
     RQ.parallel returns a requestor that processes many requestors in parallel,
     producing an array of all of the successful results. It can take two arrays
@@ -157,18 +157,7 @@ var RQ = (function () {
 
     function check(method, requestors, milliseconds, optionals, untilliseconds) {
 
-// Verify that the arguments are typed properly.
-
-        function is_function(value, index, array) {
-            if (typeof value !== 'function') {
-                var e = new TypeError("not a function");
-                e.array = array;
-                e.index = index;
-                e.method = method;
-                e.value = value;
-                throw e;
-            }
-        }
+// Verify that the arguments are typed properly.        
 
 // requestors must be an array of functions, and it may be empty only if
 // optionals is present.
@@ -178,26 +167,26 @@ var RQ = (function () {
                 throw new TypeError(method + " requestors");
             }
         } else {
+            check("RQ.parallel optionals", optionals, untilliseconds);
             if (requestors && !Array.isArray(requestors)) {
                 throw new TypeError(method + " requestors");
             }
-            if (!Array.isArray(optionals) || optionals.length === 0) {
-                throw new TypeError(method + " optionals");
-            }
-            optionals.forEach(is_function);
         }
-        requestors.forEach(is_function);
+        requestors.forEach(function (value, index) {
+            if (typeof value !== 'function') {
+                var e = new TypeError("not a function");
+                e.array = requestors;
+                e.index = index;
+                e.method = method;
+                e.value = value;
+                throw e;
+            }
+        });
         if (
             milliseconds &&
             (typeof milliseconds !== 'number' || milliseconds < 0)
         ) {
             throw new TypeError(method + " milliseconds");
-        }
-        if (
-            untilliseconds &&
-            (typeof untilliseconds !== 'number' || untilliseconds < 0)
-        ) {
-            throw new TypeError(method + " untilliseconds");
         }
     }
 
@@ -289,8 +278,8 @@ var RQ = (function () {
         },
         parallel: function parallel(
             requireds,
-            optionals,
             milliseconds,
+            optionals,
             untilliseconds
         ) {
 
@@ -299,10 +288,12 @@ var RQ = (function () {
 // requestors finish successfully before the time expires. The result is an
 // array collecting the results of all of the requestors.
 
-            if (typeof optionals === 'number') {
-                milliseconds = optionals;
-                untilliseconds = undefined;
-                optionals = undefined;
+// If there is no milliseconds argument, then shift the other arguments.
+
+            if (typeof milliseconds !== 'number') {
+                untilliseconds = optionals;
+                optionals = milliseconds;
+                milliseconds = undefined;
             }
             check("RQ.parallel", requireds, milliseconds, optionals,
                     untilliseconds);

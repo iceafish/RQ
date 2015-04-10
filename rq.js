@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-04-08
+    2015-04-09
     Public Domain
 
 This package uses four kinds of functions:
@@ -98,8 +98,8 @@ RQ.race(requestors [, milliseconds])
     requestors are cancelled.
 
 
-RQ.parallel(requestors [, milliseconds])
-RQ.parallel(requestors, optionals [, milliseconds, [untilliseconds]])
+RQ.parallel(requireds [, milliseconds])
+RQ.parallel(requireds, optionals [, milliseconds, [untilliseconds]])
 
     RQ.parallel returns a requestor that processes many requestors in parallel,
     producing an array of all of the successful results. It can take two arrays
@@ -108,13 +108,13 @@ RQ.parallel(requestors, optionals [, milliseconds, [untilliseconds]])
     of the required requestors have finished, or until the optional
     untilliseconds timer has expired.
 
-    The result maps the requestors and optionals into a single array. The
-    value produced by the first element of the requestors array provides the
+    The result maps the required requestors and optional requestors into a
+    single array. The value produced by the first element of the requestors array provides the
     first element of the result.
 
     If the optional milliseconds argument is supplied, then if all of the
     required requestors are not successful in the allotted time, then the
-    parallel fails. If there are no required requestors, and if at least one
+    parallel fails. If the requireds array is empty, and if at least one
     optional requestor is successful within the allotted time, then the
     parallel succeeds.
 
@@ -287,30 +287,34 @@ var RQ = (function () {
                 return cancel;
             };
         },
-        parallel: function parallel(requestors, optionals, milliseconds,
-                untilliseconds) {
+        parallel: function parallel(
+            requireds,
+            optionals,
+            milliseconds,
+            untilliseconds
+        ) {
 
-// RQ.parallel takes an array of requestors, and an optional second array of
-// requestors, and starts them all. It succeeds if all of the requestors in
-// the first array finish successfully before the time expires. The result
-// is an array collecting the results of all of the requestors.
+// RQ.parallel takes an array of required requestors, and an optional array of
+// optional requestors, and starts them all. It succeeds if all of the required
+// requestors finish successfully before the time expires. The result is an
+// array collecting the results of all of the requestors.
 
             if (typeof optionals === 'number') {
                 milliseconds = optionals;
                 untilliseconds = undefined;
                 optionals = undefined;
             }
-            check("RQ.parallel", requestors, milliseconds, optionals,
+            check("RQ.parallel", requireds, milliseconds, optionals,
                     untilliseconds);
 
             return function requestor(callback, initial) {
                 var cancels = [],
                     optionals_remaining,
                     optionals_successes = 0,
-                    requestors_length = requestors.length,
-                    requestors_remaining = requestors.length,
+                    requireds_length = requireds.length,
+                    requireds_remaining = requireds.length,
                     results = [],
-                    timeout_till,
+                    timeout_until,
                     timeout_id;
 
                 function finish(success, failure) {
@@ -321,9 +325,9 @@ var RQ = (function () {
                             clearTimeout(timeout_id);
                             timeout_id = null;
                         }
-                        if (timeout_till) {
-                            clearTimeout(timeout_till);
-                            timeout_till = null;
+                        if (timeout_until) {
+                            clearTimeout(timeout_until);
+                            timeout_until = null;
                         }
                         cancels.forEach(function (cancel) {
                             if (typeof cancel === 'function') {
@@ -349,29 +353,29 @@ var RQ = (function () {
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         timeout_id = null;
-                        return requestors_remaining === 0 && (
-                            requestors_length > 0 || optionals_successes > 0
+                        return requireds_remaining === 0 && (
+                            requireds_length > 0 || optionals_successes > 0
                         )
                         ? finish(results)
                         : cancel(expired("RQ.parallel", milliseconds));
                     }, milliseconds);
+                }
 
-// untilliseconds, if specified, gives more time for the optional requestors to
-// complete. Normally, the optional requestors have until all of the required
-// requestors finish. If untilliseconds is larger than milliseconds,
+// Normally, the optional requestors have until all of the required requestors
+// finish. If untilliseconds was specified, more time is given for the optional
+// requestors to complete. If untilliseconds is larger than milliseconds,
 // milliseconds wins.
 
-                }
                 if (untilliseconds) {
-                    timeout_till = setTimeout(function () {
-                        timeout_till = null;
-                        if (requestors_remaining === 0) {
+                    timeout_until = setTimeout(function () {
+                        timeout_until = null;
+                        if (requireds_remaining === 0) {
                             return finish(results);
                         }
                     }, untilliseconds);
                 }
-                if (requestors) {
-                    requestors.forEach(function (requestor, index) {
+                if (requireds) {
+                    requireds.forEach(function (requestor, index) {
                         return setImmediate(function () {
                             var once = true,
                                 cancellation = requestor(
@@ -383,9 +387,11 @@ var RQ = (function () {
                                                 return cancel(failure);
                                             }
                                             results[index] = success;
-                                            requestors_remaining -= 1;
-                                            if (requestors_remaining === 0 &&
-                                                    !timeout_till) {
+                                            requireds_remaining -= 1;
+                                            if (
+                                                requireds_remaining === 0 &&
+                                                !timeout_until
+                                            ) {
                                                 return finish(results);
                                             }
                                         }
@@ -408,34 +414,34 @@ var RQ = (function () {
                                         if (once && cancels) {
                                             once = false;
                                             cancels[
-                                                requestors_length + index
+                                                requireds_length + index
                                             ] = null;
                                             if (failure === undefined) {
                                                 results[
-                                                    requestors_length + index
+                                                    requireds_length + index
                                                 ] = success;
                                                 optionals_successes += 1;
                                             }
                                             optionals_remaining -= 1;
                                             if (optionals_remaining === 0) {
-                                                if (requestors_remaining === 0) {
-                                                    return requestors_length > 0 ||
+                                                if (requireds_remaining === 0) {
+                                                    return requireds_length > 0 ||
                                                             optionals_successes > 0
                                                     ? finish(results)
                                                     : cancel(failure);
                                                 }
-                                                if (timeout_till) {
-                                                    clearTimeout(timeout_till);
-                                                    timeout_till = null;
+                                                if (timeout_until) {
+                                                    clearTimeout(timeout_until);
+                                                    timeout_until = null;
                                                 }
                                             }
                                         }
                                     },
                                     initial
                                 );
-                            if (cancels[requestors_length + index] ===
+                            if (cancels[requireds_length + index] ===
                                     undefined) {
-                                cancels[requestors_length + index] = cancellation;
+                                cancels[requireds_length + index] = cancellation;
                             }
                         });
                     });

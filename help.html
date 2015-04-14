@@ -150,7 +150,7 @@ RQ.parallel(requireds, milliseconds, optionals, untilliseconds)</h4>
 <p>If a milliseconds argument is provided, then the race will fail if it does not finish before the time limit.</p>
 <h4>RQ.fallback(requestors)<br>
 RQ.fallback(requestors, milliseconds)</h4>
-<p><code>RQ.fallback</code> takes an array of requestor functions and an optional time limit in milliseconds. It returns a requestor function try each of the requestors in order until one is successful.  If all of the requestors in the array fail, then the sequence fails. The array is not modified.</p>
+<p><code>RQ.fallback</code> takes an array of requestor functions and an optional time limit in milliseconds. It returns a requestor function that will try each of the requestors in order until one is successful.  If all of the requestors in the array fail, then the sequence fails. The array is not modified.</p>
 <p>If a milliseconds argument is provided, then the fallback will fail if it does not finish before the time limit.</p>
 <h2>Function Types</h2>
 <p><code>RQ</code> makes use of four types of functions: requestors, callbacks, cancels, and factories.</p>
@@ -249,6 +249,7 @@ respond = RQ.fallback([
         buildPage
     ], 100),
     planB
-]};</pre>
+]};</pre> 
+<p>To start things running, call <code>respond</code>, passing a callback function that will receive the final result, and the intial value that wll be given to <code>getId</code>.</p>
 </body>
 </html>

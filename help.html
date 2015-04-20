@@ -233,7 +233,7 @@ RQ.fallback(requestors, milliseconds)</h4>
         return callback(object);
     };
 }</pre>
-<p>We could write our <code>buildPage</code> requestor to take an array of values, but it makes more sense of give it an object so that its code will be self documenting. The <code>construct</code> factory makes that easy.</p>
+<p>We could write our <code>buildPage</code> requestor to take an array of values, but it makes more sense to give it an object so that its code will be self documenting. The <code>construct</code> factory makes that easy.</p>
 <pre>
 respond = RQ.fallback([
     RQ.sequence([

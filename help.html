@@ -137,7 +137,7 @@ code {
     getAd(adnet.trackPipe)
 ]);
 </pre>
-<p><code>getAd</code> is a factory function that makes requestors. <code>getAd</code> takes a parameter that identifies an advertising network. In this example,  requests will be made of of three advertising networks. The first to provide an acceptable response will win.</p>
+<p><code>getAd</code> is a factory function that makes requestors. <code>getAd</code> takes a parameter that identifies an advertising network. In this example,  requests will be made of three advertising networks. The first to provide an acceptable response will win.</p>
 <p><code>RQ</code> can also support fallbacks. If Plan A fails, try Plan B. And if that fails, Plan C. The <code>getWeather</code> requestor that was used above could have been made as a fallback. It would first try to get a result from the local cache. If that fails, it will try the local database. If that fails, it will try the remote database.</p>
 <pre>getWeather = RQ.fallback([
     fetch(&quot;weather&quot;, localCache),

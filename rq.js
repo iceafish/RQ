@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-05-02
+    2015-09-30
     Public Domain
 
 This package uses four kinds of functions:
@@ -215,13 +215,13 @@ var RQ = (function () {
 
                 function finish(success, failure) {
                     var r = callback;
-                    cancellation = null;
+                    cancellation = undefined;
                     if (r) {
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
-                        callback = null;
-                        timeout_id = null;
+                        callback = undefined;
+                        timeout_id = undefined;
                         return r(success, failure);
                     }
                 }
@@ -246,7 +246,7 @@ var RQ = (function () {
 
                         if (index >= requestors.length) {
                             clearTimeout(timeout_id);
-                            cancellation = null;
+                            cancellation = undefined;
                             return cancel(failure);
                         }
 
@@ -261,7 +261,7 @@ var RQ = (function () {
                                     function callback(success, failure) {
                                         if (once) {
                                             once = false;
-                                            cancellation = null;
+                                            cancellation = undefined;
                                             return failure === undefined
                                                 ? finish(success)
                                                 : next(index + 1, failure);
@@ -311,22 +311,22 @@ var RQ = (function () {
                 function finish(success, failure) {
                     var r = callback;
                     if (r) {
-                        callback = null;
+                        callback = undefined;
                         if (timeout_id) {
                             clearTimeout(timeout_id);
-                            timeout_id = null;
+                            timeout_id = undefined;
                         }
                         if (timeout_until) {
                             clearTimeout(timeout_until);
-                            timeout_until = null;
+                            timeout_until = undefined;
                         }
                         cancels.forEach(function (cancel) {
                             if (typeof cancel === 'function') {
                                 return setImmediate(cancel, failure);
                             }
                         });
-                        cancels = null;
-                        results = null;
+                        cancels = undefined;
+                        results = undefined;
                         return r(success, failure);
                     }
                 }
@@ -343,7 +343,7 @@ var RQ = (function () {
 
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
-                        timeout_id = null;
+                        timeout_id = undefined;
                         return requireds_remaining === 0 && (
                             requireds_length > 0 || optionals_successes > 0
                         )
@@ -359,7 +359,7 @@ var RQ = (function () {
 
                 if (untilliseconds) {
                     timeout_until = setTimeout(function () {
-                        timeout_until = null;
+                        timeout_until = undefined;
                         if (requireds_remaining === 0) {
                             return finish(results);
                         }
@@ -373,8 +373,8 @@ var RQ = (function () {
                                     function callback(success, failure) {
                                         if (once && cancels) {
                                             once = false;
-                                            cancels[index] = null;
-                                            if (failure !== undefined) {
+                                            cancels[index] = undefined;
+                                            if (failure) {
                                                 return cancel(failure);
                                             }
                                             results[index] = success;
@@ -406,8 +406,8 @@ var RQ = (function () {
                                             once = false;
                                             cancels[
                                                 requireds_length + index
-                                            ] = null;
-                                            if (failure === undefined) {
+                                            ] = undefined;
+                                            if (!failure) {
                                                 results[
                                                     requireds_length + index
                                                 ] = success;
@@ -423,7 +423,7 @@ var RQ = (function () {
                                                 }
                                                 if (timeout_until) {
                                                     clearTimeout(timeout_until);
-                                                    timeout_until = null;
+                                                    timeout_until = undefined;
                                                 }
                                             }
                                         }
@@ -456,7 +456,7 @@ var RQ = (function () {
                 function finish(success, failure) {
                     var r = callback;
                     if (r) {
-                        callback = null;
+                        callback = undefined;
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
@@ -465,7 +465,7 @@ var RQ = (function () {
                                 return setImmediate(cancel);
                             }
                         });
-                        cancels = null;
+                        cancels = undefined;
                         return r(success, failure);
                     }
                 }
@@ -487,8 +487,8 @@ var RQ = (function () {
                                 function callback(success, failure) {
                                     if (once && cancels) {
                                         once = false;
-                                        cancels[index] = null;
-                                        if (failure === undefined) {
+                                        cancels[index] = undefined;
+                                        if (!failure) {
                                             return finish(success);
                                         }
                                         remaining -= 1;
@@ -523,12 +523,12 @@ var RQ = (function () {
 
                 function finish(success, failure) {
                     var r = callback;
-                    cancellation = null;
+                    cancellation = undefined;
                     if (r) {
                         if (timeout_id) {
                             clearTimeout(timeout_id);
                         }
-                        callback = null;
+                        callback = undefined;
                         return r(success, failure);
                     }
                 }
@@ -543,7 +543,7 @@ var RQ = (function () {
                 check_callback("RQ.sequence", callback, initial);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
-                        timeout_id = null;
+                        timeout_id = undefined;
                         return cancel(expired("RQ.sequence", milliseconds));
                     }, milliseconds);
                 }
@@ -557,8 +557,8 @@ var RQ = (function () {
                             if (timeout_id) {
                                 clearTimeout(timeout_id);
                             }
-                            callback = null;
-                            cancellation = null;
+                            callback = undefined;
+                            cancellation = undefined;
                             return r(initial);
                         }
 
@@ -572,8 +572,8 @@ var RQ = (function () {
                                 function callback(success, failure) {
                                     if (once) {
                                         once = false;
-                                        cancellation = null;
-                                        if (failure !== undefined) {
+                                        cancellation = undefined;
+                                        if (failure) {
                                             return cancel(failure);
                                         }
                                         initial = success;
@@ -590,3 +590,5 @@ var RQ = (function () {
         }
     };
 }());
+
+// module.exports = RQ;

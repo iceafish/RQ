@@ -89,8 +89,7 @@ code {
 <body>
 <h1>RQ</h1>
 <p>Douglas Crockford<br>
-    2015-04-14
-</p>
+    2015-10-06</p>
 <p><b><code>RQ</code></b> is a small JavaScript library for managing asynchronicity in server applications.</p>
 <p>The source is available at  <a href="https://github.com/douglascrockford/RQ">https://github.com/douglascrockford/RQ</a>. This page is available at <a href="http://www.RQ.crockford.com/">http://www.RQ.crockford.com/</a>. It is in the Public Domain.</p>
 <h2>Asynchronicity</h2>
@@ -211,7 +210,9 @@ RQ.fallback(requestors, milliseconds)</h4>
 <h3>Delay Requestor</h3>
 <p>The <code>delay_requestor</code> inserts a delay into a sequence without blocking. </p>
 <pre>function delay_requestor(callback, value) {
-    var timeout_id = setTimeout(callback, 1000);
+    var timeout_id = setTimeout(function () {
+    	return callback(value);
+    }, 1000);
     return function cancel(reason) {
         return clearTimeout(timeout_id);
     };
@@ -221,7 +222,9 @@ RQ.fallback(requestors, milliseconds)</h4>
 <p>The <code>delay</code> factory simplifies the making of delay requestors.</p>
 <pre>function delay(milliseconds) {
     return function requestor(callback, value) {
-        var timeout_id = setTimeout(callback, milliseconds);
+        var timeout_id = setTimeout(function () {
+    	    return callback(value);
+        }, milliseconds);
         return function cancel(reason) {
             return clearTimeout(timeout_id);
         };

@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-09-30
+    2015-11-16
     Public Domain
 
 This package uses four kinds of functions:
@@ -591,4 +591,4 @@ var RQ = (function () {
     };
 }());
 
-// module.exports = RQ;
+/*node module.exports = RQ;*/

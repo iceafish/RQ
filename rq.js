@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-11-16
+    2015-11-27
     Public Domain
 
 This package uses four kinds of functions:
@@ -253,12 +253,12 @@ var RQ = (function () {
 // If there is another requestor, call it in the next turn, passing the value
 // and a callback that will take the next step.
 
-                        var rqstr = requestors[index];
+                        var next_requestor = requestors[index];
                         setImmediate(function () {
                             var once = true;
                             if (typeof callback === 'function') {
-                                cancellation = rqstr(
-                                    function callback(success, failure) {
+                                cancellation = next_requestor(
+                                    function next_callback(success, failure) {
                                         if (once) {
                                             once = false;
                                             cancellation = undefined;
@@ -344,8 +344,9 @@ var RQ = (function () {
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         timeout_id = undefined;
-                        return requireds_remaining === 0 && (
-                            requireds_length > 0 || optionals_successes > 0
+                        return (
+                            requireds_remaining === 0 &&
+                            (requireds_length > 0 || optionals_successes > 0)
                         )
                             ? finish(results)
                             : cancel(expired("RQ.parallel", milliseconds));
@@ -370,7 +371,7 @@ var RQ = (function () {
                         return setImmediate(function () {
                             var once = true,
                                 cancellation = requestor(
-                                    function callback(success, failure) {
+                                    function parallel_callback(success, failure) {
                                         if (once && cancels) {
                                             once = false;
                                             cancels[index] = undefined;
@@ -401,7 +402,7 @@ var RQ = (function () {
                         return setImmediate(function () {
                             var once = true,
                                 cancellation = requestor(
-                                    function callback(success, failure) {
+                                    function optional_callback(success, failure) {
                                         if (once && cancels) {
                                             once = false;
                                             cancels[
@@ -416,8 +417,10 @@ var RQ = (function () {
                                             optionals_remaining -= 1;
                                             if (optionals_remaining === 0) {
                                                 if (requireds_remaining === 0) {
-                                                    return requireds_length > 0 ||
-                                                            optionals_successes > 0
+                                                    return (
+                                                        requireds_length > 0 ||
+                                                        optionals_successes > 0
+                                                    )
                                                         ? finish(results)
                                                         : cancel(failure);
                                                 }
@@ -476,7 +479,7 @@ var RQ = (function () {
 
                 check_callback("RQ.race", callback, initial);
                 if (milliseconds) {
-                    timeout_id = setTimeout(function timeout_id() {
+                    timeout_id = setTimeout(function race_timeout() {
                         return cancel(expired("RQ.race", milliseconds));
                     }, milliseconds);
                 }
@@ -484,7 +487,7 @@ var RQ = (function () {
                     return setImmediate(function () {
                         var once = true,
                             cancellation = requestor(
-                                function callback(success, failure) {
+                                function race_callback(success, failure) {
                                     if (once && cancels) {
                                         once = false;
                                         cancels[index] = undefined;
@@ -548,8 +551,9 @@ var RQ = (function () {
                     }, milliseconds);
                 }
                 (function next(index) {
-                    var rqstr, r = callback;
-                    if (typeof r === 'function') {
+                    var next_requestor,
+                        next_callback = callback;
+                    if (typeof next_callback === 'function') {
 
 // If there are no more requestors, then signal success.
 
@@ -559,17 +563,17 @@ var RQ = (function () {
                             }
                             callback = undefined;
                             cancellation = undefined;
-                            return r(initial);
+                            return next_callback(initial);
                         }
 
 // If there is another requestor, call it in the next turn, passing the value
 // and a callback that will take the next step.
 
-                        rqstr = requestors[index];
+                        next_requestor = requestors[index];
                         setImmediate(function () {
                             var once = true;
-                            cancellation = rqstr(
-                                function callback(success, failure) {
+                            cancellation = next_requestor(
+                                function sequence_callback(success, failure) {
                                     if (once) {
                                         once = false;
                                         cancellation = undefined;

@@ -17,13 +17,13 @@ function widget(name) {
     'use strict';
     return function requestor(callback, value) {
         var result = value
-                ? value + '>' + name
-                : name,
-            demo = document.getElementById("demo"),
-            fieldset = document.createElement("fieldset"),
-            legend = document.createElement("legend"),
-            success = document.createElement("input"),
-            failure = document.createElement("input");
+            ? value + '>' + name
+            : name;
+        var demo = document.getElementById("demo");
+        var fieldset = document.createElement("fieldset");
+        var legend = document.createElement("legend");
+        var success = document.createElement("input");
+        var failure = document.createElement("input");
         fieldset.appendChild(legend);
         fieldset.appendChild(success);
         fieldset.appendChild(failure);
@@ -49,12 +49,12 @@ function widget(name) {
 
 function show(success, failure) {
     'use strict';
-    var result,
-        title,
-        color,
-        demo = document.getElementById("demo"),
-        fieldset = document.createElement("fieldset"),
-        legend = document.createElement("legend");
+    var result;
+    var title;
+    var color;
+    var demo = document.getElementById("demo");
+    var fieldset = document.createElement("fieldset");
+    var legend = document.createElement("legend");
     if (failure === undefined) {
         result = String(success);
         title = "success";

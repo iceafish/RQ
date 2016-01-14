@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2015-11-27
+    2016-01-13
     Public Domain
 
 This package uses four kinds of functions:
@@ -210,8 +210,8 @@ var RQ = (function () {
 
             check("RQ.fallback", requestors, milliseconds);
             return function requestor(callback, initial) {
-                var cancellation,
-                    timeout_id;
+                var cancellation;
+                var timeout_id;
 
                 function finish(success, failure) {
                     var r = callback;
@@ -299,14 +299,14 @@ var RQ = (function () {
                     untilliseconds);
 
             return function requestor(callback, initial) {
-                var cancels = [],
-                    optionals_remaining,
-                    optionals_successes = 0,
-                    requireds_length = requireds.length,
-                    requireds_remaining = requireds.length,
-                    results = [],
-                    timeout_until,
-                    timeout_id;
+                var cancels = [];
+                var optionals_remaining;
+                var optionals_successes = 0;
+                var requireds_length = requireds.length;
+                var requireds_remaining = requireds.length;
+                var results = [];
+                var timeout_until;
+                var timeout_id;
 
                 function finish(success, failure) {
                     var r = callback;
@@ -369,27 +369,27 @@ var RQ = (function () {
                 if (requireds) {
                     requireds.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true,
-                                cancellation = requestor(
-                                    function parallel_callback(success, failure) {
-                                        if (once && cancels) {
-                                            once = false;
-                                            cancels[index] = undefined;
-                                            if (failure) {
-                                                return cancel(failure);
-                                            }
-                                            results[index] = success;
-                                            requireds_remaining -= 1;
-                                            if (
-                                                requireds_remaining === 0 &&
-                                                !timeout_until
-                                            ) {
-                                                return finish(results);
-                                            }
+                            var once = true;
+                            var cancellation = requestor(
+                                function parallel_callback(success, failure) {
+                                    if (once && cancels) {
+                                        once = false;
+                                        cancels[index] = undefined;
+                                        if (failure) {
+                                            return cancel(failure);
                                         }
-                                    },
-                                    initial
-                                );
+                                        results[index] = success;
+                                        requireds_remaining -= 1;
+                                        if (
+                                            requireds_remaining === 0 &&
+                                            !timeout_until
+                                        ) {
+                                            return finish(results);
+                                        }
+                                    }
+                                },
+                                initial
+                            );
                             if (cancels && cancels[index] === undefined) {
                                 cancels[index] = cancellation;
                             }
@@ -400,41 +400,42 @@ var RQ = (function () {
                     optionals_remaining = optionals.length;
                     optionals.forEach(function (requestor, index) {
                         return setImmediate(function () {
-                            var once = true,
-                                cancellation = requestor(
-                                    function optional_callback(success, failure) {
-                                        if (once && cancels) {
-                                            once = false;
-                                            cancels[
+                            var once = true;
+                            var cancellation = requestor(
+                                function optional_callback(success, failure) {
+                                    if (once && cancels) {
+                                        once = false;
+                                        cancels[
+                                            requireds_length + index
+                                        ] = undefined;
+                                        if (!failure) {
+                                            results[
                                                 requireds_length + index
-                                            ] = undefined;
-                                            if (!failure) {
-                                                results[
-                                                    requireds_length + index
-                                                ] = success;
-                                                optionals_successes += 1;
+                                            ] = success;
+                                            optionals_successes += 1;
+                                        }
+                                        optionals_remaining -= 1;
+                                        if (optionals_remaining === 0) {
+                                            if (requireds_remaining === 0) {
+                                                return (
+                                                    requireds_length > 0 ||
+                                                    optionals_successes > 0
+                                                )
+                                                    ? finish(results)
+                                                    : cancel(failure);
                                             }
-                                            optionals_remaining -= 1;
-                                            if (optionals_remaining === 0) {
-                                                if (requireds_remaining === 0) {
-                                                    return (
-                                                        requireds_length > 0 ||
-                                                        optionals_successes > 0
-                                                    )
-                                                        ? finish(results)
-                                                        : cancel(failure);
-                                                }
-                                                if (timeout_until) {
-                                                    clearTimeout(timeout_until);
-                                                    timeout_until = undefined;
-                                                }
+                                            if (timeout_until) {
+                                                clearTimeout(timeout_until);
+                                                timeout_until = undefined;
                                             }
                                         }
-                                    },
-                                    initial
-                                );
-                            if (cancels[requireds_length + index] ===
-                                    undefined) {
+                                    }
+                                },
+                                initial
+                            );
+                            if (
+                                cancels[requireds_length + index] === undefined
+                            ) {
                                 cancels[requireds_length + index] = cancellation;
                             }
                         });
@@ -452,9 +453,9 @@ var RQ = (function () {
 
             check("RQ.race", requestors, milliseconds);
             return function requestor(callback, initial) {
-                var cancels = [],
-                    remaining = requestors.length,
-                    timeout_id;
+                var cancels = [];
+                var remaining = requestors.length;
+                var timeout_id;
 
                 function finish(success, failure) {
                     var r = callback;
@@ -485,23 +486,23 @@ var RQ = (function () {
                 }
                 requestors.forEach(function (requestor, index) {
                     return setImmediate(function () {
-                        var once = true,
-                            cancellation = requestor(
-                                function race_callback(success, failure) {
-                                    if (once && cancels) {
-                                        once = false;
-                                        cancels[index] = undefined;
-                                        if (!failure) {
-                                            return finish(success);
-                                        }
-                                        remaining -= 1;
-                                        if (remaining === 0) {
-                                            return cancel(failure);
-                                        }
+                        var once = true;
+                        var cancellation = requestor(
+                            function race_callback(success, failure) {
+                                if (once && cancels) {
+                                    once = false;
+                                    cancels[index] = undefined;
+                                    if (!failure) {
+                                        return finish(success);
                                     }
-                                },
-                                initial
-                            );
+                                    remaining -= 1;
+                                    if (remaining === 0) {
+                                        return cancel(failure);
+                                    }
+                                }
+                            },
+                            initial
+                        );
                         if (cancels[index] === undefined) {
                             cancels[index] = cancellation;
                         }
@@ -521,8 +522,8 @@ var RQ = (function () {
 
             check("RQ.sequence", requestors, milliseconds);
             return function requestor(callback, initial) {
-                var cancellation,
-                    timeout_id;
+                var cancellation;
+                var timeout_id;
 
                 function finish(success, failure) {
                     var r = callback;
@@ -551,8 +552,8 @@ var RQ = (function () {
                     }, milliseconds);
                 }
                 (function next(index) {
-                    var next_requestor,
-                        next_callback = callback;
+                    var next_requestor;
+                    var next_callback = callback;
                     if (typeof next_callback === 'function') {
 
 // If there are no more requestors, then signal success.

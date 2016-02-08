@@ -5,7 +5,9 @@
 // that displays the final result, and an RQ program written as an annotated
 // nested array.
 
-/*global document, RQ */
+/*jslint browser */
+
+/*global RQ */
 
 /*property
     addEventListener, appendChild, backgroundColor, createElement,
@@ -74,46 +76,46 @@ function show(success, failure) {
 
 RQ.parallel([
     RQ.sequence([
-        widget('Seq A1'),
-        widget('Seq A2'),
-        widget('Seq A3')
+        widget("Seq A1"),
+        widget("Seq A2"),
+        widget("Seq A3")
     ]),
     RQ.sequence([
-        widget('Seq B1'),
-        widget('Seq B2'),
-        widget('Seq B3')
+        widget("Seq B1"),
+        widget("Seq B2"),
+        widget("Seq B3")
     ]),
-    widget('C'),
+    widget("C"),
     RQ.race([
-        widget('Race D1'),
-        widget('Race D2'),
-        widget('Race D3')
+        widget("Race D1"),
+        widget("Race D2"),
+        widget("Race D3")
     ]),
     RQ.fallback([
-        widget('Fall E1'),
-        widget('Fall E2'),
-        widget('Fall E3')
+        widget("Fall E1"),
+        widget("Fall E2"),
+        widget("Fall E3")
     ])
 ], [
     RQ.sequence([
-        widget('Opt Seq O1'),
-        widget('Opt Seq O2'),
-        widget('Opt Seq O3')
+        widget("Opt Seq O1"),
+        widget("Opt Seq O2"),
+        widget("Opt Seq O3")
     ]),
     RQ.sequence([
-        widget('Opt Seq P1'),
-        widget('Opt Seq P2'),
-        widget('Opt Seq P3')
+        widget("Opt Seq P1"),
+        widget("Opt Seq P2"),
+        widget("Opt Seq P3")
     ]),
-    widget('Opt Q'),
+    widget("Opt Q"),
     RQ.race([
-        widget('Opt Race R1'),
-        widget('Opt Race R2'),
-        widget('Opt Race R3')
+        widget("Opt Race R1"),
+        widget("Opt Race R2"),
+        widget("Opt Race R3")
     ]),
     RQ.fallback([
-        widget('Opt Fall S1'),
-        widget('Opt Fall S2'),
-        widget('Opt Fall S3')
+        widget("Opt Fall S1"),
+        widget("Opt Fall S2"),
+        widget("Opt Fall S3")
     ])
 ])(show);

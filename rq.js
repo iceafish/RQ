@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2016-01-13
+    2016-02-07
     Public Domain
 
 This package uses four kinds of functions:
@@ -173,7 +173,7 @@ var RQ = (function () {
             }
         }
         requestors.forEach(function (value, index) {
-            if (typeof value !== 'function') {
+            if (typeof value !== "function") {
                 var e = new TypeError("not a function");
                 e.array = requestors;
                 e.index = index;
@@ -184,17 +184,17 @@ var RQ = (function () {
         });
         if (
             milliseconds &&
-            (typeof milliseconds !== 'number' || milliseconds < 0)
+            (typeof milliseconds !== "number" || milliseconds < 0)
         ) {
             throw new TypeError(method + " milliseconds");
         }
     }
 
     function check_callback(method, callback, initial) {
-        if (typeof callback !== 'function') {
+        if (typeof callback !== "function") {
             throw new TypeError(method + " callback");
         }
-        if (initial !== null && typeof initial === 'object') {
+        if (initial !== null && typeof initial === "object") {
             Object.freeze(initial);
         }
     }
@@ -227,7 +227,7 @@ var RQ = (function () {
                 }
 
                 function cancel(reason) {
-                    if (callback && typeof cancellation === 'function') {
+                    if (callback && typeof cancellation === "function") {
                         setImmediate(cancellation, reason);
                     }
                     return finish(undefined, reason || true);
@@ -240,7 +240,7 @@ var RQ = (function () {
                     }, milliseconds);
                 }
                 (function next(index, failure) {
-                    if (typeof callback === 'function') {
+                    if (typeof callback === "function") {
 
 // If there are no more requestors, then signal failure.
 
@@ -256,7 +256,7 @@ var RQ = (function () {
                         var next_requestor = requestors[index];
                         setImmediate(function () {
                             var once = true;
-                            if (typeof callback === 'function') {
+                            if (typeof callback === "function") {
                                 cancellation = next_requestor(
                                     function next_callback(success, failure) {
                                         if (once) {
@@ -290,7 +290,7 @@ var RQ = (function () {
 
 // If there is no milliseconds argument, then shift the other arguments.
 
-            if (typeof milliseconds !== 'number') {
+            if (typeof milliseconds !== "number") {
                 untilliseconds = optionals;
                 optionals = milliseconds;
                 milliseconds = undefined;
@@ -321,7 +321,7 @@ var RQ = (function () {
                             timeout_until = undefined;
                         }
                         cancels.forEach(function (cancel) {
-                            if (typeof cancel === 'function') {
+                            if (typeof cancel === "function") {
                                 return setImmediate(cancel, failure);
                             }
                         });
@@ -465,7 +465,7 @@ var RQ = (function () {
                             clearTimeout(timeout_id);
                         }
                         cancels.forEach(function stop(cancel) {
-                            if (typeof cancel === 'function') {
+                            if (typeof cancel === "function") {
                                 return setImmediate(cancel);
                             }
                         });
@@ -538,7 +538,7 @@ var RQ = (function () {
                 }
 
                 function cancel(reason) {
-                    if (callback && typeof cancellation === 'function') {
+                    if (callback && typeof cancellation === "function") {
                         setImmediate(cancellation, reason);
                     }
                     return finish(undefined, reason || true);
@@ -554,7 +554,7 @@ var RQ = (function () {
                 (function next(index) {
                     var next_requestor;
                     var next_callback = callback;
-                    if (typeof next_callback === 'function') {
+                    if (typeof next_callback === "function") {
 
 // If there are no more requestors, then signal success.
 

@@ -170,7 +170,7 @@ RQ.fallback(requestors, milliseconds)</h4>
 <h2>Function Types</h2>
 <p><code>RQ</code> makes use of four types of functions: requestors, callbacks, cancels, and factories.</p>
 <h3>Requestor(callback, value)</h3>
-<p>A <i>requestor</i> is a function that represents some unit of work. It can be a simple function, or it can be a complex job, task, production step, or operation that will organize the work of many machines over a long period of time. A requestor function takes two arguments: A callback and an optional value. The callback will be used by the requestor to communicate its result. The optional value makes the result of a previous value in a sequence to the requestor.</p>
+<p>A <i>requestor</i> is a function that represents some unit of work. It can be a simple function, or it can be a complex job, task, production step, or operation that will organize the work of many machines over a long period of time. A requestor function takes two arguments: A callback and an optional value. The callback will be used by the requestor to communicate its result. The optional value is the result of the previous step in the sequence.</p>
 <p>A requestor may optionally return a cancel function that can be used to cancel the request.</p>
 <h3>Callback(success, failure)</h3>
 <p>A <i>callback</i> is a function that is passed to a requestor so that the requestor can communicate its result. A callback can take two arguments, success and failure. If failure is falsy, then the requestor was successful. </p>

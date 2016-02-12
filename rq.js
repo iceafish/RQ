@@ -141,7 +141,7 @@ RQ.sequence(requestors [, milliseconds])
 */
 
 var RQ = (function () {
-    'use strict';
+    "use strict";
 
     function expired(method, milliseconds) {
 

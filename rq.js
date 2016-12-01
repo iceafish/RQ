@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2016-02-07
+    2016-12-01
     Public Domain
 
 This package uses four kinds of functions:
@@ -503,7 +503,7 @@ var RQ = (function () {
                             },
                             initial
                         );
-                        if (cancels[index] === undefined) {
+                        if (cancels && cancels[index] === undefined) {
                             cancels[index] = cancellation;
                         }
                     });

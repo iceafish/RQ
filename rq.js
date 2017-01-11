@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2016-12-01
+    2017-01-10
     Public Domain
 
 This package uses four kinds of functions:
@@ -190,12 +190,9 @@ var RQ = (function () {
         }
     }
 
-    function check_callback(method, callback, initial) {
+    function check_callback(method, callback) {
         if (typeof callback !== "function") {
             throw new TypeError(method + " callback");
-        }
-        if (initial !== null && typeof initial === "object") {
-            Object.freeze(initial);
         }
     }
 
@@ -233,7 +230,7 @@ var RQ = (function () {
                     return finish(undefined, reason || true);
                 }
 
-                check_callback("RQ.fallback", callback, initial);
+                check_callback("RQ.fallback", callback);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         return cancel(expired("RQ.fallback", milliseconds));
@@ -335,7 +332,7 @@ var RQ = (function () {
                     return finish(undefined, reason || true);
                 }
 
-                check_callback("RQ.parallel", callback, initial);
+                check_callback("RQ.parallel", callback);
 
 // milliseconds, if specified, says take no longer to process this request. If
 // any of the required requestors are not successful by this time, the parallel
@@ -478,7 +475,7 @@ var RQ = (function () {
                     return finish(undefined, reason || true);
                 }
 
-                check_callback("RQ.race", callback, initial);
+                check_callback("RQ.race", callback);
                 if (milliseconds) {
                     timeout_id = setTimeout(function race_timeout() {
                         return cancel(expired("RQ.race", milliseconds));
@@ -544,7 +541,7 @@ var RQ = (function () {
                     return finish(undefined, reason || true);
                 }
 
-                check_callback("RQ.sequence", callback, initial);
+                check_callback("RQ.sequence", callback);
                 if (milliseconds) {
                     timeout_id = setTimeout(function () {
                         timeout_id = undefined;

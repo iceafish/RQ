@@ -2,7 +2,7 @@
     rq.js
 
     Douglas Crockford
-    2017-01-10
+    2017-04-04
     Public Domain
 
 This package uses four kinds of functions:
@@ -155,38 +155,39 @@ var RQ = (function () {
         };
     }
 
-    function check(method, requestors, milliseconds, optionals, untilliseconds) {
+    function check(
+        method,
+        requestors,
+        milliseconds
+    ) {
 
 // Verify that the arguments are typed properly.
 
 // requestors must be an array of functions, and it may be empty only if
 // optionals is present.
 
-        if (optionals === undefined) {
-            if (!Array.isArray(requestors) || requestors.length === 0) {
-                throw new TypeError(method + " requestors");
-            }
-        } else {
-            check("RQ.parallel optionals", optionals, untilliseconds);
-            if (requestors && !Array.isArray(requestors)) {
-                throw new TypeError(method + " requestors");
-            }
-        }
         requestors.forEach(function (value, index) {
             if (typeof value !== "function") {
-                var e = new TypeError("not a function");
-                e.array = requestors;
-                e.index = index;
-                e.method = method;
-                e.value = value;
-                throw e;
+                throw {
+                    name: "TypeError",
+                    message: "not a function",
+                    array: requestors,
+                    index: index,
+                    method: method,
+                    value: value
+                };
             }
         });
         if (
-            milliseconds &&
+            milliseconds !== undefined &&
             (typeof milliseconds !== "number" || milliseconds < 0)
         ) {
-            throw new TypeError(method + " milliseconds");
+            throw {
+                name: "TypeError",
+                message: "milliseconds",
+                method: method,
+                value: milliseconds
+            };
         }
     }
 
@@ -285,15 +286,59 @@ var RQ = (function () {
 // requestors finish successfully before the time expires. The result is an
 // array collecting the results of all of the requestors.
 
+// RQ.parallel can also take an object of requests, and an optional object of
+// optional requestors. In this case, the result is an object collecting the
+// results of all of the requestors as named properties.
+
 // If there is no milliseconds argument, then shift the other arguments.
 
+            var names;
             if (typeof milliseconds !== "number") {
                 untilliseconds = optionals;
                 optionals = milliseconds;
                 milliseconds = undefined;
             }
-            check("RQ.parallel", requireds, milliseconds, optionals,
-                    untilliseconds);
+
+// If requireds is an object, then convert it into an array, remembering the
+// property names.
+
+            if (typeof requireds === "object" && !Array.isArray(requireds)) {
+                names = Object.keys(requireds);
+                var newly = [];
+                names.forEach(function (name) {
+                    newly.push(requireds[name]);
+                });
+                requireds = newly;
+                if (optionals) {
+                    if (optionals === "object" && Array.isArray(optionals)) {
+                        throw {
+                            name: "TypeError",
+                            message: "object expected",
+                            method: "RQ.parallel",
+                            value: optionals
+                        };
+                    }
+                    var optional_names = Object.keys(optionals);
+                    names = names.concat(optional_names);
+                    newly = [];
+                    optional_names.forEach(function (name) {
+                        newly.push(optionals[name]);
+                    });
+                    optionals = newly;
+                }
+            }
+            check("RQ.parallel", requireds, milliseconds);
+            if (optionals) {
+                check("RQ.parallel", optionals, untilliseconds);
+                if (optionals.length === 0) {
+                    throw {
+                        name: "TypeError",
+                        message: "optionals expected",
+                        method: "RQ.parallel",
+                        value: optionals
+                    };
+                }
+            }
 
             return function requestor(callback, initial) {
                 var cancels = [];
@@ -322,6 +367,13 @@ var RQ = (function () {
                                 return setImmediate(cancel, failure);
                             }
                         });
+                        if (success && names) {
+                            results = {};
+                            names.forEach(function (name, index) {
+                                results[name] = success[index];
+                            });
+                            success = results;
+                        }
                         cancels = undefined;
                         results = undefined;
                         return r(success, failure);

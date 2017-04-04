@@ -58,17 +58,17 @@ function show(success, failure) {
     var fieldset = document.createElement("fieldset");
     var legend = document.createElement("legend");
     if (failure === undefined) {
-        result = String(success);
+        result = JSON.stringify(success);
         title = "success";
         color = "lightgreen";
     } else {
-        result = String(failure);
+        result = JSON.stringify(failure);
         title = "failure";
         color = "pink";
     }
     fieldset.appendChild(legend);
     legend.appendChild(document.createTextNode(title));
-    fieldset.appendChild(document.createTextNode(JSON.stringify(result)));
+    fieldset.appendChild(document.createTextNode(result));
     fieldset.style.backgroundColor = color;
     legend.style.backgroundColor = color;
     demo.appendChild(fieldset);

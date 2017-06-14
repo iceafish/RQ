@@ -86,18 +86,6 @@ RQ.fallback(requestors, milliseconds)
     requestor is cancelled.
 
 
-RQ.race(requestors [, milliseconds])
-
-    RQ.race returns a requestor that starts all of the functions in the
-    requestors array in parallel. Its result is the result of the first of
-    those requestors to successfully finish (all of the other requestors are
-    cancelled). If all of those requestors fail, then the race fails.
-
-    If the optional milliseconds argument is supplied, then if no requestor has
-    been successful in the allotted time, then the race fails, and all pending
-    requestors are cancelled.
-
-
 RQ.parallel(requireds [, milliseconds])
 RQ.parallel(requireds [, milliseconds], optionals [,untilliseconds])
 
@@ -112,11 +100,27 @@ RQ.parallel(requireds [, milliseconds], optionals [,untilliseconds])
     single array. The value produced by the first element of the requestors
     array provides the first element of the result.
 
+    RQ.parallel also allows required and optionals to be objects of requestors.
+    The result will be an object containing names corresponding to the
+    method names.
+
     If the optional milliseconds argument is supplied, then if all of the
     required requestors are not successful in the allotted time, then the
     parallel fails. If the requireds array is empty, and if at least one
     optional requestor is successful within the allotted time, then the
     parallel succeeds.
+
+
+RQ.race(requestors [, milliseconds])
+
+    RQ.race returns a requestor that starts all of the functions in the
+    requestors array in parallel. Its result is the result of the first of
+    those requestors to successfully finish (all of the other requestors will
+    be cancelled). If all of those requestors fail, then the race fails.
+
+    If the optional milliseconds argument is supplied, then if no requestor has
+    been successful in the allotted time, then the race fails, and all pending
+    requestors are cancelled.
 
 
 RQ.sequence(requestors [, milliseconds])
@@ -155,16 +159,9 @@ var RQ = (function () {
         };
     }
 
-    function check(
-        method,
-        requestors,
-        milliseconds
-    ) {
+    function check(method, requestors, milliseconds) {
 
 // Verify that the arguments are typed properly.
-
-// requestors must be an array of functions, and it may be empty only if
-// optionals is present.
 
         requestors.forEach(function (value, index) {
             if (typeof value !== "function") {

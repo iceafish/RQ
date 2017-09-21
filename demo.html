@@ -43,23 +43,6 @@ input[value="failure"]:hover {
 </style>
 </head>
 <body>
-<script>
-// Some browsers do not yet implement setImmediate.
-
-/*global window */
-
-if (typeof window.setImmediate !== 'function') {
-    window.setImmediate = function (func) {
-        'use strict';
-        var args = arguments;
-        return window.setTimeout(function () {
-            return func.apply(undefined, args);
-        }, 0);
-    };
-    window.clearImmediate = window.clearTimeout;
-}
-</script>
 <div id=demo></div>
-<script src=rq.js></script>
-<script src=demo.js></script>
+<script src="./demo.js" type=module></script>
 </body></html>

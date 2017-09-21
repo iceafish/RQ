@@ -7,13 +7,13 @@
 
 /*jslint browser */
 
-/*global RQ */
-
 /*property
     addEventListener, appendChild, backgroundColor, createElement,
     createTextNode, fallback, getElementById, parallel, race, sequence,
     stringify, style, type, value
 */
+
+import RQ from "./rq.js";
 
 function widget(name) {
     'use strict';

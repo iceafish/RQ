@@ -89,7 +89,7 @@ code {
 <body>
 <h1>RQ: Better Living Through Asynchronicity</h1>
 <p>Douglas Crockford<br>
-    2017-04-04</p>
+    2017-09-20</p>
 <p><b><code>RQ</code></b> is a small JavaScript library for managing asynchronicity in server applications.</p>
 <p>The source is available at  <a href="https://github.com/douglascrockford/RQ">https://github.com/douglascrockford/RQ</a>. This page is available at <a href="http://www.RQ.crockford.com/">http://RQ.crockford.com/</a>. It is in the Public Domain.</p>
 <h2>Asynchronicity</h2>
@@ -112,7 +112,8 @@ code {
 <h2>Workflow</h2>
 <p>With <code>RQ</code>, a workflow is broken into a set of steps or tasks or jobs. Each step is represented by a function. These functions are called <i>requestors</i> because calling one is likely to initiate a request. <code>RQ</code> provides services that can collect some requestors together and process them sequentially or in parallel.</p>
 <p>For example, the <code>respond</code> requestor will call the <code>getId</code> requestor, give that result to the <code>getPreference</code> requestor, and give that result to the <code>getStuff</code> requestor. The <code>buildPage</code> requestor will use the stuff to build a page.</p>
-<pre>respond = RQ.sequence([
+<pre>import RQ from &quot;./rq.js&quot;
+respond = RQ.sequence([
     getId,
     getPreference,
     getStuff,
@@ -145,7 +146,7 @@ code {
 </pre>
 <p><code>RQ</code> provides just four functions: <code>RQ.sequence</code>, <code>RQ.parallel</code>, <code>RQ.race</code>, and <code>RQ.fallback</code>. Each takes an array of requestors and returns a requestor that combines them into a unit. Each can also take an optional time limit which can cancel the jobs and produce an early failure if time runs out.</p>
 <h2>The RQ Library</h2>
-<p><code>RQ</code> is delivered as a single file, <a href="https://github.com/douglascrockford/RQ">rq.js</a>. When run, it produces an <code>RQ</code> variable containing an object containing four functions.</p>
+<p><code>RQ</code> module is delivered as a single file, <a href="https://github.com/douglascrockford/RQ">rq.js</a>. It exports  the <code>RQ</code>  object containing four functions: <code>sequence</code>, <code>parallel</code>, <code>race</code>, and <code>fallback</code>.</p>
 <h4>RQ.sequence(requestors)<br>
     RQ.sequence(requestors, milliseconds)</h4>
 <p><code>RQ.sequence</code> takes an array of requestor functions and an optional time limit in milliseconds. It returns a requestor function that will start each of the requestors in order, giving the result of each to the next one. If all complete successfully, the result will be the result of the last requestor in the array. If any of the requestors in the array fail, then the sequence fails. The array is not modified.</p>
@@ -206,12 +207,12 @@ RQ.fallback(requestors, milliseconds)</h4>
     return value.firstname + &quot; &quot; + value.lastname;
 }</pre>
 <p>We can turn it into a requestor that works just like the <code>fullname_requestor</code>:</p>
-<pre>var fullname_requestor = requestorize(make_fullname);
+<pre>let fullname_requestor = requestorize(make_fullname);
 </pre>
 <h3>Delay Requestor</h3>
 <p>The <code>delay_requestor</code> inserts a delay into a sequence without blocking. </p>
 <pre>function delay_requestor(callback, value) {
-    var timeout_id = setTimeout(function () {
+    let timeout_id = setTimeout(function () {
     	return callback(value);
     }, 1000);
     return function cancel(reason) {
@@ -223,7 +224,7 @@ RQ.fallback(requestors, milliseconds)</h4>
 <p>The <code>delay</code> factory simplifies the making of delay requestors.</p>
 <pre>function delay(milliseconds) {
     return function requestor(callback, value) {
-        var timeout_id = setTimeout(function () {
+        let timeout_id = setTimeout(function () {
     	    return callback(value);
         }, milliseconds);
         return function cancel(reason) {

@@ -5,7 +5,7 @@
 // that displays the final result, and an RQ program written as an annotated
 // nested array.
 
-/*jslint browser */
+/*jslint browser, es6 */
 
 /*property
     addEventListener, appendChild, backgroundColor, createElement,
@@ -16,16 +16,15 @@
 import RQ from "./rq.js";
 
 function widget(name) {
-    'use strict';
     return function requestor(callback, value) {
-        var result = value
-            ? value + '>' + name
+        let result = value
+            ? value + ">" + name
             : name;
-        var demo = document.getElementById("demo");
-        var fieldset = document.createElement("fieldset");
-        var legend = document.createElement("legend");
-        var success = document.createElement("input");
-        var failure = document.createElement("input");
+        let demo = document.getElementById("demo");
+        let fieldset = document.createElement("fieldset");
+        let legend = document.createElement("legend");
+        let success = document.createElement("input");
+        let failure = document.createElement("input");
         fieldset.appendChild(legend);
         fieldset.appendChild(success);
         fieldset.appendChild(failure);
@@ -50,13 +49,12 @@ function widget(name) {
 }
 
 function show(success, failure) {
-    'use strict';
-    var result;
-    var title;
-    var color;
-    var demo = document.getElementById("demo");
-    var fieldset = document.createElement("fieldset");
-    var legend = document.createElement("legend");
+    let result;
+    let title;
+    let color;
+    let demo = document.getElementById("demo");
+    let fieldset = document.createElement("fieldset");
+    let legend = document.createElement("legend");
     if (failure === undefined) {
         result = JSON.stringify(success);
         title = "success";

@@ -1,7 +1,7 @@
 // rq.js
 
 // Douglas Crockford
-// 2017-09-20
+// 2017-12-12
 // Public Domain
 
 /*
@@ -11,7 +11,8 @@ This package uses four kinds of functions:
     cancel
     factory
 
-requestor(callback [, initial])
+requestor(callback)
+requestor(callback, initial)
     may return a cancel function
 
     A requestor is a function that makes a request. Such a request need not
@@ -52,7 +53,7 @@ cancel(reason)
     cancel's reason argument may become the callback's failure argument.
 
 
-factory([arguments])
+factory(...arguments)
     returns a requestor function
 
     A factory function produces requestor functions. A factory function will
@@ -85,8 +86,12 @@ RQ.fallback(requestors, milliseconds)
     requestor is cancelled.
 
 
-RQ.parallel(requireds [, milliseconds])
-RQ.parallel(requireds [, milliseconds], optionals [,untilliseconds])
+RQ.parallel(requireds)
+RQ.parallel(requireds, optionals)
+RQ.parallel(requireds, optionals, untilliseconds)
+RQ.parallel(requireds, milliseconds)
+RQ.parallel(requireds, milliseconds, optionals)
+RQ.parallel(requireds, milliseconds, optionals, untilliseconds)
 
     RQ.parallel returns a requestor that processes many requestors in parallel,
     producing an array of all of the successful results. It can take two arrays
@@ -110,7 +115,8 @@ RQ.parallel(requireds [, milliseconds], optionals [,untilliseconds])
     parallel succeeds.
 
 
-RQ.race(requestors [, milliseconds])
+RQ.race(requestors)
+RQ.race(requestors, milliseconds)
 
     RQ.race returns a requestor that starts all of the functions in the
     requestors array in parallel. Its result is the result of the first of
@@ -122,7 +128,8 @@ RQ.race(requestors [, milliseconds])
     requestors are cancelled.
 
 
-RQ.sequence(requestors [, milliseconds])
+RQ.sequence(requestors)
+RQ.sequence(requestors, milliseconds)
 
     RQ.sequence returns a requestor that processes each element of the
     requestors array one at a time. Each will be passed the result of the
@@ -134,7 +141,7 @@ RQ.sequence(requestors [, milliseconds])
     fails and the pending requestor is cancelled.
 */
 
-/*jslint es6, node */
+/*jslint node */
 
 /*properties
     array, evidence, fallback, freeze, forEach, index, isArray, length,
@@ -255,7 +262,7 @@ export default Object.freeze({
                                     if (once) {
                                         once = false;
                                         cancellation = undefined;
-                                        return failure === undefined
+                                        return (failure === undefined)
                                             ? finish(success)
                                             : next(index + 1, failure);
                                     }

@@ -312,7 +312,7 @@ export default Object.freeze({
             });
             requireds = newly;
             if (optionals) {
-                if (optionals === "object" && Array.isArray(optionals)) {
+                if (typeof optionals !== "object" || Array.isArray(optionals)) {
                     throw {
                         name: "TypeError",
                         message: "object expected",
@@ -389,7 +389,7 @@ export default Object.freeze({
             check_callback("RQ.parallel", callback);
 
 // milliseconds, if specified, says take no longer to process this request. If
-// any of the required requestors are not successful by this time, the parallel
+// any of the required requestors is not successful by this time, the parallel
 // requestor fails.
 
             if (milliseconds) {

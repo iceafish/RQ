@@ -1,0 +1,33 @@
+{
+  "name": "@alipay/dc-rq",
+  "version": "1.0.3",
+  "description": "RQ: Better living through asynchronicity",
+  "main": "rq.min.js",
+  "files": [
+    "README",
+    "rq.js",
+    "rq.d.ts"
+  ],
+  "typings": "./rq.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iceafish/RQ.git"
+  },
+  "publishConfig": {
+    "registry": "http://registry.npm.alibaba-inc.com"
+  },
+  "keywords": [
+    "rq",
+    "async"
+  ],
+  "author": "Douglas Crockford",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iceafish/RQ/issues"
+  },
+  "readmeFilename": "README",
+  "homepage": "https://github.com/iceafish/RQ#readme"
+}

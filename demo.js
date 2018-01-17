@@ -17,6 +17,7 @@ import RQ from "./rq.js";
 
 function widget(name) {
     return function requestor(callback, value) {
+        console.log(callback, value);
         let result = value
             ? value + ">" + name
             : name;
@@ -55,6 +56,7 @@ function show(success, failure) {
     let demo = document.getElementById("demo");
     let fieldset = document.createElement("fieldset");
     let legend = document.createElement("legend");
+    alert(`${success}, ${failure}`);
     if (failure === undefined) {
         result = JSON.stringify(success);
         title = "success";
@@ -72,48 +74,64 @@ function show(success, failure) {
     demo.appendChild(fieldset);
 }
 
-RQ.parallel([
-    RQ.sequence([
-        widget("Seq A1"),
-        widget("Seq A2"),
-        widget("Seq A3")
-    ]),
-    RQ.sequence([
-        widget("Seq B1"),
-        widget("Seq B2"),
-        widget("Seq B3")
-    ]),
-    widget("C"),
-    RQ.race([
-        widget("Race D1"),
-        widget("Race D2"),
-        widget("Race D3")
-    ]),
-    RQ.fallback([
-        widget("Fall E1"),
-        widget("Fall E2"),
-        widget("Fall E3")
-    ])
-], [
-    RQ.sequence([
-        widget("Opt Seq O1"),
-        widget("Opt Seq O2"),
-        widget("Opt Seq O3")
-    ]),
-    RQ.sequence([
-        widget("Opt Seq P1"),
-        widget("Opt Seq P2"),
-        widget("Opt Seq P3")
-    ]),
-    widget("Opt Q"),
-    RQ.race([
-        widget("Opt Race R1"),
-        widget("Opt Race R2"),
-        widget("Opt Race R3")
-    ]),
-    RQ.fallback([
-        widget("Opt Fall S1"),
-        widget("Opt Fall S2"),
-        widget("Opt Fall S3")
-    ])
-])(show);
+const a = RQ.sequence([
+    widget("Seq A1"),
+    widget("Seq A2"),
+    widget("Seq A3"),
+]);
+
+console.log('sequence ret:');
+console.log(a);
+
+console.log('sequence ret exec ret:');
+const cancel = a(show, 'start');
+console.log(cancel);
+// setTimeout(() => {
+//     console.log(cancel('wo kai xin !!!'));
+// }, 2000);
+
+// RQ.parallel([
+//     RQ.sequence([
+//         widget("Seq A1"),
+//         widget("Seq A2"),
+//         widget("Seq A3")
+//     ]),
+//     RQ.sequence([
+//         widget("Seq B1"),
+//         widget("Seq B2"),
+//         widget("Seq B3")
+//     ]),
+//     widget("C"),
+//     RQ.race([
+//         widget("Race D1"),
+//         widget("Race D2"),
+//         widget("Race D3")
+//     ]),
+//     RQ.fallback([
+//         widget("Fall E1"),
+//         widget("Fall E2"),
+//         widget("Fall E3")
+//     ])
+// ], [
+//     RQ.sequence([
+//         widget("Opt Seq O1"),
+//         widget("Opt Seq O2"),
+//         widget("Opt Seq O3")
+//     ]),
+//     RQ.sequence([
+//         widget("Opt Seq P1"),
+//         widget("Opt Seq P2"),
+//         widget("Opt Seq P3")
+//     ]),
+//     widget("Opt Q"),
+//     RQ.race([
+//         widget("Opt Race R1"),
+//         widget("Opt Race R2"),
+//         widget("Opt Race R3")
+//     ]),
+//     RQ.fallback([
+//         widget("Opt Fall S1"),
+//         widget("Opt Fall S2"),
+//         widget("Opt Fall S3")
+//     ])
+// ])(show);

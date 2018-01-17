@@ -149,10 +149,13 @@ respond = rq.sequence([
 <p><code>RQ</code> provides just four functions: <code>rq.sequence</code>, <code>rq.parallel</code>, <code>rq.race</code>, and <code>rq.fallback</code>. Each takes an array of requestors and returns a requestor that combines them into a unit. Each can also take an optional time limit that can cancel the jobs and produce an early failure if time runs out.</p>
 <h2>The RQ Library</h2>
 <p><code>The RQ</code> module is delivered as a single file, <a href="https://github.com/douglascrockford/RQ">rq.js</a>. It exports  the <code>rq</code>  object containing four functions: <code>sequence</code>, <code>parallel</code>, <code>race</code>, and <code>fallback</code>.</p>
+<p><code>The RQ</code> 模块发布只有一个单独的文件, <a href="https://github.com/douglascrockford/RQ">rq.js</a>. 它暴露一个 <code>rq</code>  对象，其中包含四个方法: <code>sequence</code>, <code>parallel</code>, <code>race</code>, and <code>fallback</code>.</p>
 <h4>rq.sequence(requestors)<br>
     rq.sequence(requestors, milliseconds)</h4>
 <p><code>rq.sequence</code> takes an array of requestor functions and an optional time limit in milliseconds. It returns a requestor function that will start each of the requestors in order, giving the result of each to the next requestor in the list. If all complete successfully, the result will be the result of the last requestor in the array. If any of the requestors in the array fail, then the sequence fails. The array is not modified.</p>
+<p><code>rq.sequence</code> 接受一个请求函数列表 和 一个可选的限制时间(毫秒)参数. 它返回一个请求者函数，该函数将按顺序执行每个请求, 将每个请求的结果都给列表中的下一个请求. 如果所有成功完成, 结果将是数组中最后一个请求的结果. 如果请求列表中任意一个失败了, 那么这个任务队列就失败了. 这个数组将不会被修改.</p>
 <p>If a <code>milliseconds</code> argument is provided, then the sequence will fail if it does not finish before the time limit.</p>
+<p>如果提供了一个 <code>milliseconds</code> 参数, 那么如果它没有在时间限制之前完成, 那么序列就会失败.</p>
 <h4>rq.parallel(requireds)<br>
 rq.parallel(requireds, milliseconds)<br>
 rq.parallel(requireds, optionals)<br>

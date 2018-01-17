@@ -1,8 +1,7 @@
-type Callback = (success: Function, failure: any) => void;
-
 declare module RQ {
 
   type Cancel = (reason: any) => void;
+  type Callback = (success: Function, failure: any) => void;
   type Requestor = (callback: Callback, initial: any) => Cancel;
 
   // RQ.sequence takes an array of requestor functions, and returns a requestor
